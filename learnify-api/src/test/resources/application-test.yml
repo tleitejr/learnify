@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: LearnifyAPI
+
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: "jdbc:h2:mem:learnifydb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;INIT=CREATE ALIAS IF NOT EXISTS GEN_RANDOM_UUID FOR \"java.util.UUID.randomUUID\""
+    username: sa
+    password:
+
+  sql:
+    init:
+      mode: never
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  h2:
+    console:
+      enabled: true
+
+jwt:
+  secret: aaa05039c6b498ee1da4f4b5e24dfdea

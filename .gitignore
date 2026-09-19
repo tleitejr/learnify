@@ -1,0 +1,66 @@
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node / Vite / frontend
+node_modules/
+coverage/
+dist/
+dist-ssr/
+*.local
+
+# Java / Gradle / backend
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+bin/
+out/
+!**/src/main/**/build/
+!**/src/test/**/build/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+# IDE / editor
+.idea/
+.vscode/
+!.vscode/extensions.json
+.DS_Store
+*.iml
+*.iws
+*.ipr
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Spring / Java tooling
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# Local environment files
+learnify-api/.env
+learnify-web/.env.local
+learnify-web/.env.*.local
+**/HELP.md
+learnify-db/.env/.env.*
+!learnify-db/.env/.env.*.example

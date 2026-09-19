@@ -1,0 +1,454 @@
+openapi: 3.0.3
+info:
+  title: Learnify API
+  version: "1.0.0"
+  description: Final Year Project (Academic Capstone) - Bachelor in Software Engineering degree at UNINTER.
+
+servers:
+  - url: http://localhost:8080
+    description: Ambiente Local
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Authenticates a user with email and password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequestDTO"
+      responses:
+        "200":
+          description: Token JWT gerado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponseDTO"
+        "401":
+          description: Credenciais inválidas!
+
+  /api/v1/auth/signup:
+    post:
+      tags: [Auth]
+      summary: Registers a new user on the platform.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioRequestDTO"
+      responses:
+        "200":
+          description: Token JWT gerado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponseDTO"
+        "400":
+          description: Email já cadastrado!
+
+  /api/v1/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logs out the authenticated user.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Logout feito com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogoutResponseDTO"
+        "401":
+          description: Usuário não encontrado!
+
+  /api/v1/auth/delete:
+    delete:
+      tags: [Auth]
+      summary: Deletes the authenticated user account.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Conta removida com sucesso
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Usuário deletado com sucesso"
+
+  /api/v1/disciplinas:
+    get:
+      tags: [Disciplina]
+      summary: Lists all disciplines available on the platform.
+      responses:
+        "200":
+          description: Lista de disciplinas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DisciplinaResponseDTO"
+
+  /api/v1/disciplinas/{disciplinaId}/conteudos:
+    get:
+      tags: [Conteudo]
+      summary: Lists contents belonging to a discipline.
+      parameters:
+        - name: disciplinaId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Lista de conteúdos da disciplina
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ConteudoResponseDTO"
+
+  /api/v1/conteudos/{conteudoId}/quiz:
+    get:
+      tags: [Quiz]
+      summary: Returns quiz questions for a content.
+      parameters:
+        - name: conteudoId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Lista de questões do quiz
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/QuestaoResponseDTO"
+
+  /api/v1/quiz/responder:
+    post:
+      tags: [RespostaQuiz]
+      summary: Sends a user answer for a quiz question.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RespostaQuizRequestDTO"
+      responses:
+        "200":
+          description: Resposta processada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultadoQuizResponseDTO"
+
+  /api/v1/ranking:
+    get:
+      tags: [Ranking]
+      summary: Returns the ranking of users.
+      responses:
+        "200":
+          description: Página do ranking
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/RankingResponseDTO"
+                  totalElements:
+                    type: integer
+                    format: int64
+                  totalPages:
+                    type: integer
+                    format: int32
+                  number:
+                    type: integer
+                    format: int32
+                  size:
+                    type: integer
+                    format: int32
+
+  /api/v1/usuarios/me:
+    get:
+      tags: [Usuario]
+      summary: Returns the authenticated user profile.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Perfil do usuário autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioResponseDTO"
+
+  /api/v1/usuarios/me/conquistas:
+    get:
+      tags: [Usuario]
+      summary: Lists achievements earned by the authenticated user.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Lista de conquistas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ConquistaResponseDTO"
+
+  /api/v1/usuarios/me/estatisticas:
+    get:
+      tags: [Usuario]
+      summary: Returns performance statistics for the authenticated user.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Estatísticas do usuário
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EstatisticasUsuarioResponseDTO"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    LoginRequestDTO:
+      type: object
+      required: [email, senha]
+      properties:
+        email:
+          type: string
+          example: usuario@email.com
+        senha:
+          type: string
+          example: 123456
+
+    LoginResponseDTO:
+      type: object
+      properties:
+        token:
+          type: string
+        type:
+          type: string
+        expiresIn:
+          type: integer
+          format: int64
+
+    UsuarioRequestDTO:
+      type: object
+      required: [nome, email, senha]
+      properties:
+        nome:
+          type: string
+        email:
+          type: string
+        senha:
+          type: string
+        papelUsuario:
+          type: string
+          enum: [ESTUDANTE, PROFESSOR, ADMIN]
+          nullable: true
+
+    UsuarioResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nome:
+          type: string
+        email:
+          type: string
+        nivel:
+          type: integer
+        pontuacaoTotal:
+          type: integer
+
+    DisciplinaResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        titulo:
+          type: string
+        ativo:
+          type: boolean
+        dataCriacao:
+          type: string
+          format: date-time
+
+    ConteudoResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        titulo:
+          type: string
+        ativo:
+          type: boolean
+        concluido:
+          type: boolean
+        dataCriacao:
+          type: string
+          format: date-time
+
+    AlternativaResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        descricao:
+          type: string
+
+    QuestaoResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        enunciado:
+          type: string
+        numero:
+          type: integer
+        alternativas:
+          type: array
+          items:
+            $ref: "#/components/schemas/AlternativaResponseDTO"
+
+    RespostaQuizRequestDTO:
+      type: object
+      required: [questaoId, alternativaSelecionadaId]
+      properties:
+        questaoId:
+          type: string
+          format: uuid
+        alternativaSelecionadaId:
+          type: string
+          format: uuid
+
+    ResultadoQuizResponseDTO:
+      type: object
+      properties:
+        correta:
+          type: boolean
+        pontosGanhos:
+          type: integer
+        pontuacaoTotal:
+          type: integer
+        nivel:
+          type: integer
+        conquistaDesbloqueada:
+          type: string
+          nullable: true
+
+    RankingResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        nomeUsuario:
+          type: string
+        nivel:
+          type: integer
+        pontuacaoTotal:
+          type: integer
+
+    LogoutResponseDTO:
+      type: object
+      properties:
+        message:
+          type: string
+        dataLogout:
+          type: string
+          format: date-time
+
+    ConquistaResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        titulo:
+          type: string
+        descricao:
+          type: string
+
+    EstatisticasUsuarioResponseDTO:
+      type: object
+      properties:
+        totalRespostas:
+          type: integer
+          format: int64
+        acertos:
+          type: integer
+          format: int64
+        erros:
+          type: integer
+          format: int64
+        percentual:
+          type: number
+          format: double
+        pontuacaoTotal:
+          type: integer
+          format: int32
+        mediaPontos:
+          type: number
+          format: double
+        nivel:
+          type: integer
+          format: int32
+        desempenho:
+          type: string
+
+    PontuacaoResponseDTO:
+      type: object
+      properties:
+        atividadeId:
+          type: string
+          format: uuid
+        pontosObtidos:
+          type: integer
+
+    ProgressoResponseDTO:
+      type: object
+      properties:
+        conteudoId:
+          type: string
+          format: uuid
+        percentual:
+          type: number
+        concluido:
+          type: boolean

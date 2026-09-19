@@ -1,0 +1,66 @@
+services:
+  db:
+    build:
+      context: ./learnify-db
+      dockerfile: Dockerfile
+    container_name: LearnifyDB
+    env_file:
+      - ./learnify-db/.env/.env.db
+    ports:
+      - "5432:5432"
+    networks:
+      - net
+    volumes:
+      - data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: ./learnify-api
+      dockerfile: Dockerfile
+    container_name: LearnifyAPI
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["bootRun"]
+    env_file:
+      - ./learnify-db/.env/.env.api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 3000s
+      timeout: 100s
+      retries: 3
+      start_period: 9000s
+    volumes:
+      - ./learnify-db/.data:/data:ro
+      - ./learnify-db/.env:/env:ro
+    ports:
+      - "8080:8080"
+    networks:
+      - net
+
+  web:
+    build:
+      context: ./learnify-web
+      dockerfile: Dockerfile
+    container_name: LearnifyWEB
+    depends_on:
+      api:
+        condition: service_healthy
+    command: ["run", "dev"]
+    env_file:
+      - ./learnify-db/.env/.env.web
+    ports:
+      - "5173:5173"
+    networks:
+      - net
+    volumes:
+      - ./learnify-web:/app
+      - web_dependencies:/app/node_modules
+
+networks:
+  net:
+    driver: bridge
+
+volumes:
+  data:
+  web_dependencies:
